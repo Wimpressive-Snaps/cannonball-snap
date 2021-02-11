@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=2.5
+Encoding=UTF-8
+Name=Cannonball
+Comment=An Enhanced OutRun Engine
+Icon=${SNAP}/meta/gui/cannonball.png
+Exec=cannonball
+Terminal=false
+StartupNotify=false
+Categories=Game;

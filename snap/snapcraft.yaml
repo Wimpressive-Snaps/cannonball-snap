@@ -1,0 +1,146 @@
+name: cannonball
+adopt-info: cannonball
+base: core20
+summary: The Enhanced OutRun Engine
+description: |
+ CannonBall is a program which allows you to play an enhanced version
+ of Yu Suzuki's seminal arcade racer, OutRun. Cannonball is not an
+ emulator; it is a complete rewrite of the original game into portable
+ C++.
+
+ **Enhancements**
+
+   * 60 fps gameplay (smoother than the original game)
+   * True widescreen mode (extend the play area by 25%)
+   * High Resolution mode (improves sprite scaling)
+   * New Camera Views
+   * Time Trial Mode (Beat your time on a chosen level)
+   * Continuous Mode (Play all 15 stages sequentially)
+   * Western, Japanese & Prototype Track Support
+   * Support for Custom Tracks from LayOut
+   * Customisable Music
+   * Toggle Fixed Audio ROM
+   * High Score Saving
+   * Analog and Digital Controllers Supported
+   * Automatic gear change
+   * Cheats (No Traffic, Infinite Time)
+   * Optional Attract Mode AI Improvements
+   * More level objects
+
+ **Bug Fixes**
+ Fixes for bugs present in the original game:
+   * Erroneous shadow fix
+   * Sprite zoom fix
+   * Correct millisecond value shown on passing checkpoint
+   * Steering bug
+   * Misplaced tile on music selection screen fixed
+
+ **Controls**
+
+ Connect joypads, steering wheels and pedals before starting Cannonball.
+
+ The default keys are as follows. You can redefine the keys in the menu.
+
+   * Cursors: Steering
+   * Z: Accelerate
+   * X: Brake
+   * Space: Gear Change
+   * 5: Insert Coin
+   * 1: Start
+   * Shift: Change Camera View
+   * F1: Pause
+   * F2: Advance a frame when paused (useful for observing visual problems)
+   * F3: Toggle/Freeze timers. (i.e. infinite time)
+   * F5: Menu
+
+ Manual <https://github.com/djyt/cannonball/wiki/Cannonball-Manual>
+ Wiki <https://github.com/djyt/cannonball/wiki>
+
+grade: stable
+confinement: strict
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  /usr/share/alsa:
+    bind: $SNAP/usr/share/alsa
+
+parts:
+  alsa-mixin:
+    plugin: dump
+    source: https://github.com/diddlesnaps/snapcraft-alsa.git
+    source-subdir: snapcraft-assets
+    build-packages:
+      - libasound2-dev
+    stage-packages:
+      - libasound2
+      - libasound2-plugins
+
+  desktop:
+    after: [ alsa-mixin ]
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: glib-only
+    plugin: make
+    build-packages:
+      - libglib2.0-dev
+    stage-packages:
+      - libglib2.0-bin
+
+  cannonball:
+    after: [ desktop ]
+    plugin: cmake
+    source: https://github.com/djyt/cannonball.git
+    build-packages:
+      - libboost1.71-dev
+      - libsdl2-dev
+      - wget
+    stage-packages:
+      - bsdiff
+      - libsdl2-2.0-0
+      - unzip
+      - wget
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version "$(git describe --tags)"
+      # Add cmake for Linux
+      wget -q "https://patch-diff.githubusercontent.com/raw/djyt/cannonball/pull/67.diff" -O ${SNAPCRAFT_PART_SRC}/67.diff
+      patch -p1 < ${SNAPCRAFT_PART_SRC}/67.diff
+    override-build: |
+      cd ${SNAPCRAFT_PART_SRC}/cmake
+      cmake -DTARGET=linux
+      make -j $(nproc)
+      strip --strip-unneeded cannonball
+      mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/{docs,res}
+      cp ${SNAPCRAFT_PART_SRC}/cmake/cannonball ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/
+      cp -R ${SNAPCRAFT_PART_SRC}/docs/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/docs/
+      cp -R ${SNAPCRAFT_PART_SRC}/res/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/res/
+      cp -R ${SNAPCRAFT_PART_SRC}/roms/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/docs/
+
+  cannonball-wrapper:
+    after:
+      - alsa-mixin
+      - desktop
+      - cannonball
+    plugin: dump
+    source: snap/local/
+    organize:
+      cannonball-wrapper: bin/
+      opr-10188.71.bsdiff: opt/cannonball/patches/
+
+apps:
+  cannonball:
+    command: opt/cannonball/cannonball
+    command-chain:
+      - bin/desktop-launch
+      - snap/command-chain/alsa-launch
+      - bin/cannonball-wrapper
+    environment:
+      ALWAYS_USE_PULSEAUDIO: '1'
+    plugs:
+      - audio-playback
+      - desktop
+      - joystick
+      - network
+      - opengl
+      - wayland
+      - x11

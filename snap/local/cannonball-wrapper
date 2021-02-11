@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Install config
+if [ ! -e "${SNAP_USER_COMMON}/config.xml" ]; then
+  cp "${SNAP}/opt/cannonball/res/config.xml" "${SNAP_USER_COMMON}/config.xml"
+fi
+
+# Symlink resources
+if [ ! -d "${SNAP_USER_COMMON}/res" ]; then
+  ln -s /snap/${SNAP_NAME}/current/opt/cannonball/res "${SNAP_USER_COMMON}/res"
+fi
+
+# Install ROMS
+if [ ! -e "${SNAP_USER_COMMON}/master.zip" ]; then
+  wget --no-config -qc "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip"
+fi
+
+if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381b.132" ]; then
+  unzip -joq "${SNAP_USER_COMMON}/master.zip" -d "${SNAP_USER_COMMON}/roms"
+fi
+
+# Fix Corrupted Audio
+if [ ! -e "${SNAP_USER_COMMON}/roms/opr-10188.71f" ]; then
+  bspatch "${SNAP_USER_COMMON}/roms/opr-10188.71" "${SNAP_USER_COMMON}/roms/opr-10188.71f" "${SNAP}/opt/cannonball/patches/opr-10188.71.bsdiff"
+fi
+
+cd "${SNAP_USER_COMMON}"
+exec "${SNAP}/opt/cannonball/cannonball"
