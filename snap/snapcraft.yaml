@@ -96,10 +96,7 @@ parts:
       - libsdl2-dev
       - wget
     stage-packages:
-      - bsdiff
       - libsdl2-2.0-0
-      - unzip
-      - wget
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version "$(git describe --tags)"
@@ -124,6 +121,12 @@ parts:
       - cannonball
     plugin: dump
     source: snap/local/
+    stage-packages:
+      - bsdiff
+      - perl
+      - unzip
+      - wget
+      - yad
     organize:
       cannonball-wrapper: bin/
       opr-10188.71.bsdiff: opt/cannonball/patches/
