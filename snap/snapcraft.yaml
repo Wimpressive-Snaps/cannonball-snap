@@ -75,6 +75,7 @@ parts:
     stage-packages:
       - libasound2
       - libasound2-plugins
+      - yad
 
   desktop:
     after: [ alsa-mixin ]
