@@ -144,6 +144,7 @@ apps:
     plugs:
       - audio-playback
       - desktop
+      - desktop-legacy
       - joystick
       - network
       - opengl
