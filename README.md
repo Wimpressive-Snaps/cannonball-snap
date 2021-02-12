@@ -6,11 +6,9 @@
 
 <p align="center"><b>This is the snap for Cannonball</b>, <i>"An Enhanced OutRun Engine"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux distributions.</p>
 
-<!-- Uncomment and modify this when you are provided a build status badge
 <p align="center">
-<a href="https://build.snapcraft.io/user/snapcrafters/fork-and-rename-me"><img src="https://build.snapcraft.io/badge/snapcrafters/fork-and-rename-me.svg" alt="Snap Status"></a>
+<a href="https://snapcraft.io/cannonball"><img alt="cannonball" src="https://snapcraft.io/cannonball/badge.svg" /></a>
 </p>
--->
 
 ![cannonball-menu](.github/cannonball-menu.png?raw=true "Cannonball")
 
@@ -18,16 +16,12 @@
 
 ## Install
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/cannonball)
+
 The snap includes the game engine only; when the game runs for the first time it will download the appropriate ROM files.
 
     sudo snap install cannonball
     sudo snap connect cannonball:joystick
-
-<!-- Uncomment and modify this when your snap is available on the store
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/my-snap-name)
--->
-
-([Don't have snapd installed?](https://snapcraft.io/docs/core/install))
 
 ## About
 
