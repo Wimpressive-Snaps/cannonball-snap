@@ -12,7 +12,13 @@ fi
 
 # Install ROMS
 if [ ! -e "${SNAP_USER_COMMON}/master.zip" ]; then
-  wget --no-config -qc "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip"
+    if [ -n "${DISPLAY}" ] || [ -n "${WAYLAND_DISPLAY}" ]; then
+      wget --no-config "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip" 2>&1 | \
+      perl -p -e '$| = 1; s/^.* +([0-9]+%) +([0-9,.]+[GMKB]) +([0-9hms,.]+).*$/\1\n# Downloading... \2 (\3)/' | \
+      yad --progress --title="Downloading ROMs" --width=600 --center --no-buttons --auto-close --auto-kill --on-top --no-escape
+    else
+      wget --no-config -qc "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip"
+    fi
 fi
 
 if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381b.132" ]; then
