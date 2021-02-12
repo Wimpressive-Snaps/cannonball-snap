@@ -140,6 +140,7 @@ apps:
       - bin/cannonball-wrapper
     environment:
       ALWAYS_USE_PULSEAUDIO: '1'
+      LC_ALL: C
     plugs:
       - audio-playback
       - desktop
