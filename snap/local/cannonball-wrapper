@@ -25,6 +25,12 @@ if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381b.132" ]; then
   unzip -joq "${SNAP_USER_COMMON}/master.zip" -d "${SNAP_USER_COMMON}/roms"
 fi
 
+# Not required, just silences a message on stdout.
+# CannonBall falls back to epr-10381b.132 if epr-10381a.132 is not found.
+if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381a.132" ]; then
+  ln -s "${SNAP_USER_COMMON}/roms/epr-10381b.132" "${SNAP_USER_COMMON}/roms/epr-10381a.132"
+fi
+
 # Fix Corrupted Audio
 if [ ! -e "${SNAP_USER_COMMON}/roms/opr-10188.71f" ]; then
   bspatch "${SNAP_USER_COMMON}/roms/opr-10188.71" "${SNAP_USER_COMMON}/roms/opr-10188.71f" "${SNAP}/opt/cannonball/patches/opr-10188.71.bsdiff"
