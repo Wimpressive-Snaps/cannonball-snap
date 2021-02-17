@@ -97,6 +97,7 @@ parts:
       - wget
     stage-packages:
       - libsdl2-2.0-0
+      - libglu1-mesa
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version "$(git describe --tags)"
