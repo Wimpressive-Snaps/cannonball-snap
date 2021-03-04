@@ -3,6 +3,11 @@
 # Install config
 if [ ! -e "${SNAP_USER_COMMON}/config.xml" ]; then
   cp "${SNAP}/opt/cannonball/res/config.xml" "${SNAP_USER_COMMON}/config.xml"
+  # Map cursor keys
+  sed -i 's|<up>273|<up>1073741906|' "${SNAP_USER_COMMON}/config.xml"
+  sed -i 's|<down>274|<down>1073741905|' "${SNAP_USER_COMMON}/config.xml"
+  sed -i 's|<left>276|<left>1073741904|' "${SNAP_USER_COMMON}/config.xml"
+  sed -i 's|<right>275|<right>1073741903|' "${SNAP_USER_COMMON}/config.xml"
 fi
 
 # Symlink resources
