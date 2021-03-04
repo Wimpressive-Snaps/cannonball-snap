@@ -91,6 +91,7 @@ parts:
     after: [ desktop ]
     plugin: cmake
     source: https://github.com/djyt/cannonball.git
+    source-commit: '7a4a3b9b6426f64f5b05688c5a15cf40fa214404'
     build-packages:
       - libboost1.71-dev
       - libsdl2-dev
@@ -102,8 +103,7 @@ parts:
       snapcraftctl pull
       snapcraftctl set-version "$(git describe --tags)"
       # Add cmake for Linux
-      wget -q "https://patch-diff.githubusercontent.com/raw/djyt/cannonball/pull/67.diff" -O ${SNAPCRAFT_PART_SRC}/67.diff
-      patch -p1 < ${SNAPCRAFT_PART_SRC}/67.diff
+      wget -q "https://raw.githubusercontent.com/drfiemost/cannonball/e8ad49de7ef338377f8c831f4cf4056078755a50/cmake/linux.cmake" -O ${SNAPCRAFT_PART_SRC}/cmake/linux.cmake
     override-build: |
       cd ${SNAPCRAFT_PART_SRC}/cmake
       cmake -DTARGET=linux
@@ -140,7 +140,7 @@ apps:
       - snap/command-chain/alsa-launch
       - bin/cannonball-wrapper
     environment:
-      ALWAYS_USE_PULSEAUDIO: '1'
+      ALWAYS_USE_PULSEAUDIO: 1
       LC_ALL: C
     plugs:
       - audio-playback
