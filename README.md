@@ -4,10 +4,11 @@
   Cannonball
 </h1>
 
-<p align="center"><b>This is the snap for Cannonball</b>, <i>"An Enhanced OutRun Engine"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux distributions.</p>
+<p align="center"><b>This is the snap of Cannonball</b>, <i>"An Enhanced OutRun Engine"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux distributions.</p>
 
 <p align="center">
 <a href="https://snapcraft.io/cannonball"><img alt="cannonball" src="https://snapcraft.io/cannonball/badge.svg" /></a>
+<a href="https://snapcraft.io/cannonball"><img alt="cannonball" src="https://snapcraft.io/cannonball/trending.svg?name=0" /></a>
 </p>
 
 ![cannonball-menu](.github/cannonball-menu.png?raw=true "Cannonball")
@@ -60,3 +61,6 @@ Fixes for bugs present in the original game:
   * Correct millisecond value shown on passing checkpoint
   * Steering bug
   * Misplaced tile on music selection screen fixed
+
+An unofficial snap built with ❤︎ by Martin Wimpress using configuration at
+https://github.com/Wimpressive-Snaps/cannonball-snap from the upstream project https://github.com/djyt/cannonball
