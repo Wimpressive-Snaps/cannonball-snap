@@ -67,6 +67,8 @@ grade: stable
 confinement: strict
 
 layout:
+  /usr/share/X11/xkb:
+    bind: $SNAP/usr/share/X11/xkb
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib
   /usr/share/alsa:
@@ -131,7 +133,7 @@ parts:
     source: snap/local/
     stage-packages:
       - bsdiff
-      - perl
+      - xkb-data
       - unzip
       - wget
       - yad
