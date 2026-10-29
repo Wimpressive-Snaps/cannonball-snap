@@ -100,6 +100,7 @@ parts:
     source: https://github.com/djyt/cannonball.git
     source-tag: v0.34
     build-packages:
+      - g++
       - libboost-dev
       - libsdl2-dev
       - libgl1-mesa-dev
