@@ -1,0 +1,31 @@
+--- a/src/main/sdl2/rendersurface.cpp
++++ b/src/main/sdl2/rendersurface.cpp
+@@ -143,11 +143,28 @@
+         "Cannonball", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scn_width, scn_height,
+         flags);
+ 
++    if (!window)
++    {
++        std::cerr << "SDL window creation failed: " << SDL_GetError() << std::endl;
++        return false;
++    }
++
+     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
++    if (!renderer)
++    {
++        std::cerr << "SDL renderer creation failed: " << SDL_GetError() << std::endl;
++        return false;
++    }
+     texture = SDL_CreateTexture(renderer,
+                                SDL_PIXELFORMAT_ARGB8888,
+                                SDL_TEXTUREACCESS_STREAMING,
+                                src_width, src_height);
++
++    if (!texture)
++    {
++        std::cerr << "SDL texture creation failed: " << SDL_GetError() << std::endl;
++        return false;
++    }
+ 
+     // Convert the SDL pixel surface to 32 bit.
+     // This is potentially a larger surface area than the internal pixel array.

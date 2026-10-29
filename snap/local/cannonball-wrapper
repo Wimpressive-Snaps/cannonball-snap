@@ -1,46 +1,60 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
-# Install config
-if [ ! -e "${SNAP_USER_COMMON}/config.xml" ]; then
-  cp "${SNAP}/opt/cannonball/res/config.xml" "${SNAP_USER_COMMON}/config.xml"
-  # Map cursor keys
-  sed -i 's|<up>273|<up>1073741906|' "${SNAP_USER_COMMON}/config.xml"
-  sed -i 's|<down>274|<down>1073741905|' "${SNAP_USER_COMMON}/config.xml"
-  sed -i 's|<left>276|<left>1073741904|' "${SNAP_USER_COMMON}/config.xml"
-  sed -i 's|<right>275|<right>1073741903|' "${SNAP_USER_COMMON}/config.xml"
+mkdir -p "$SNAP_USER_COMMON"
+work=$(mktemp -d "$SNAP_USER_COMMON/.setup.XXXXXX")
+trap 'rm -rf -- "$work"' EXIT
+fail() { printf 'Cannonball: %s\n' "$*" >&2; exit 1; }
+
+# Keep existing user settings. Only publish a complete initial configuration.
+if [[ ! -e "$SNAP_USER_COMMON/config.xml" ]]; then
+  cp "$SNAP/opt/cannonball/res/config.xml" "$work/config.xml"
+  sed -i -e 's|<up>273|<up>1073741906|' \
+    -e 's|<down>274|<down>1073741905|' \
+    -e 's|<left>276|<left>1073741904|' \
+    -e 's|<right>275|<right>1073741903|' "$work/config.xml"
+  mv "$work/config.xml" "$SNAP_USER_COMMON/config.xml"
 fi
 
-# Symlink resources
-if [ ! -d "${SNAP_USER_COMMON}/res" ]; then
-  ln -s /snap/${SNAP_NAME}/current/opt/cannonball/res "${SNAP_USER_COMMON}/res"
+if [[ ! -e "$SNAP_USER_COMMON/res" ]]; then
+  ln -sfn "$SNAP/opt/cannonball/res" "$SNAP_USER_COMMON/res"
 fi
 
-# Install ROMS
-if [ ! -e "${SNAP_USER_COMMON}/master.zip" ]; then
-    if [ -n "${DISPLAY}" ] || [ -n "${WAYLAND_DISPLAY}" ]; then
-      wget --no-config "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip" 2>&1 | \
-      perl -p -e '$| = 1; s/^.* +([0-9]+%) +([0-9,.]+[GMKB]) +([0-9hms,.]+).*$/\1\n# Downloading... \2 (\3)/' | \
-      yad --progress --title="Downloading ROMs" --width=600 --center --no-buttons --auto-close --auto-kill --on-top --no-escape
-    else
-      wget --no-config -qc "https://github.com/jacktang/outrun-roms/archive/master.zip" -O "${SNAP_USER_COMMON}/master.zip"
-    fi
+# A cancelled download must never become the cached archive. Recover the broken
+# master.zip left by earlier launchers, and extract before changing user data.
+if [[ ! -s "$SNAP_USER_COMMON/roms/epr-10381b.132" || ! -s "$SNAP_USER_COMMON/roms/opr-10188.71" ]]; then
+  archive="$SNAP_USER_COMMON/master.zip"
+  if [[ ! -s "$archive" ]] || ! unzip -tq "$archive" >/dev/null 2>&1; then
+    printf 'Cannonball: downloading game data...\n' >&2
+    wget --no-config --timeout=30 --tries=3 \
+      'https://github.com/jacktang/outrun-roms/archive/master.zip' \
+      -O "$work/master.zip" || fail 'Game-data download failed. Please retry when the connection is available.'
+    unzip -tq "$work/master.zip" >/dev/null 2>&1 || fail 'Downloaded game-data archive is invalid; please retry.'
+    archive="$work/master.zip"
+  fi
+  mkdir "$work/roms"
+  unzip -joq "$archive" -d "$work/roms" || fail 'Could not extract game data.'
+  [[ -s "$work/roms/epr-10381b.132" && -s "$work/roms/opr-10188.71" ]] || fail 'Game-data archive is missing required files.'
+  mkdir -p "$SNAP_USER_COMMON/roms"
+  cp -a "$work/roms/." "$SNAP_USER_COMMON/roms/"
+  if [[ "$archive" == "$work/master.zip" ]]; then
+    mv "$archive" "$SNAP_USER_COMMON/master.zip"
+  fi
 fi
 
-if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381b.132" ]; then
-  unzip -joq "${SNAP_USER_COMMON}/master.zip" -d "${SNAP_USER_COMMON}/roms"
+# CannonBall also accepts the b revision, but this alias silences its warning.
+if [[ ! -e "$SNAP_USER_COMMON/roms/epr-10381a.132" ]]; then
+  ln -sfn epr-10381b.132 "$SNAP_USER_COMMON/roms/epr-10381a.132"
 fi
 
-# Not required, just silences a message on stdout.
-# CannonBall falls back to epr-10381b.132 if epr-10381a.132 is not found.
-if [ ! -e "${SNAP_USER_COMMON}/roms/epr-10381a.132" ]; then
-  ln -s "${SNAP_USER_COMMON}/roms/epr-10381b.132" "${SNAP_USER_COMMON}/roms/epr-10381a.132"
+if [[ ! -s "$SNAP_USER_COMMON/roms/opr-10188.71f" ]]; then
+  bspatch "$SNAP_USER_COMMON/roms/opr-10188.71" "$work/opr-10188.71f" \
+    "$SNAP/opt/cannonball/patches/opr-10188.71.bsdiff" || fail 'Could not prepare the audio data.'
+  mv "$work/opr-10188.71f" "$SNAP_USER_COMMON/roms/opr-10188.71f"
 fi
+sed -i 's|<fix_samples>0|<fix_samples>1|' "$SNAP_USER_COMMON/config.xml"
 
-# Fix Corrupted Audio
-if [ ! -e "${SNAP_USER_COMMON}/roms/opr-10188.71f" ]; then
-  bspatch "${SNAP_USER_COMMON}/roms/opr-10188.71" "${SNAP_USER_COMMON}/roms/opr-10188.71f" "${SNAP}/opt/cannonball/patches/opr-10188.71.bsdiff"
-  sed -i 's|<fix_samples>0|<fix_samples>1|' "${SNAP_USER_COMMON}/config.xml"
-fi
-
-cd "${SNAP_USER_COMMON}"
-exec "${SNAP}/opt/cannonball/cannonball"
+rm -rf -- "$work"
+trap - EXIT
+cd "$SNAP_USER_COMMON"
+exec "$SNAP/opt/cannonball/cannonball" "$@"
