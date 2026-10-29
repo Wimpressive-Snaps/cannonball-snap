@@ -101,6 +101,7 @@ parts:
     source-tag: v0.34
     build-packages:
       - g++
+      - patch
       - libboost-dev
       - libsdl2-dev
       - libgl1-mesa-dev
@@ -108,6 +109,9 @@ parts:
       - libsdl2-2.0-0
       - libglu1-mesa
       - libgl1-mesa-dri
+    override-pull: |
+      craftctl default
+      patch -p1 < "$CRAFT_PROJECT_DIR/snap/local/menu-cstdint.patch"
     override-build: |
       cmake -S "$CRAFT_PART_SRC/cmake" -B "$CRAFT_PART_BUILD" -DTARGET=linux.cmake -DCMAKE_BUILD_TYPE=Release
       cmake --build "$CRAFT_PART_BUILD" --parallel "$CRAFT_PARALLEL_BUILD_COUNT"

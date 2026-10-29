@@ -1,0 +1,10 @@
+--- a/src/main/frontend/menu.hpp
++++ b/src/main/frontend/menu.hpp
+@@ -8,6 +8,7 @@
+ 
+ #pragma once
+ 
++#include <cstdint>
+ #include <vector>
+ #include "stdint.hpp"
+ 
