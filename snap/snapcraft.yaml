@@ -1,6 +1,13 @@
 name: cannonball
-adopt-info: cannonball
-base: core20
+version: '0.34'
+base: core24
+
+platforms:
+  amd64:
+  arm64:
+  armhf:
+  ppc64el:
+  s390x:
 summary: The Enhanced OutRun Engine
 description: |
  CannonBall is a program which allows you to play an enhanced version
@@ -60,8 +67,8 @@ grade: stable
 confinement: strict
 
 layout:
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib
   /usr/share/alsa:
     bind: $SNAP/usr/share/alsa
 
@@ -73,7 +80,7 @@ parts:
     build-packages:
       - libasound2-dev
     stage-packages:
-      - libasound2
+      - libasound2t64
       - libasound2-plugins
       - yad
 
@@ -91,29 +98,24 @@ parts:
     after: [ desktop ]
     plugin: cmake
     source: https://github.com/djyt/cannonball.git
-    source-commit: '7a4a3b9b6426f64f5b05688c5a15cf40fa214404'
+    source-tag: v0.34
     build-packages:
-      - libboost1.71-dev
+      - libboost-dev
       - libsdl2-dev
-      - wget
+      - libgl1-mesa-dev
     stage-packages:
       - libsdl2-2.0-0
       - libglu1-mesa
-    override-pull: |
-      snapcraftctl pull
-      snapcraftctl set-version "$(git describe --tags)"
-      # Add cmake for Linux
-      wget -q "https://raw.githubusercontent.com/drfiemost/cannonball/e8ad49de7ef338377f8c831f4cf4056078755a50/cmake/linux.cmake" -O ${SNAPCRAFT_PART_SRC}/cmake/linux.cmake
+      - libgl1-mesa-dri
     override-build: |
-      cd ${SNAPCRAFT_PART_SRC}/cmake
-      cmake -DTARGET=linux
-      make -j $(nproc)
-      strip --strip-unneeded cannonball
-      mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/{docs,res}
-      cp ${SNAPCRAFT_PART_SRC}/cmake/cannonball ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/
-      cp -R ${SNAPCRAFT_PART_SRC}/docs/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/docs/
-      cp -R ${SNAPCRAFT_PART_SRC}/res/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/res/
-      cp -R ${SNAPCRAFT_PART_SRC}/roms/* ${SNAPCRAFT_PART_INSTALL}/opt/cannonball/docs/
+      cmake -S "$CRAFT_PART_SRC/cmake" -B "$CRAFT_PART_BUILD" -DTARGET=linux.cmake -DCMAKE_BUILD_TYPE=Release
+      cmake --build "$CRAFT_PART_BUILD" --parallel "$CRAFT_PARALLEL_BUILD_COUNT"
+      strip --strip-unneeded "$CRAFT_PART_BUILD/cannonball"
+      install -Dm755 "$CRAFT_PART_BUILD/cannonball" "$CRAFT_PART_INSTALL/opt/cannonball/cannonball"
+      mkdir -p "$CRAFT_PART_INSTALL/opt/cannonball"/{docs,res}
+      cp -R "$CRAFT_PART_SRC/docs/." "$CRAFT_PART_INSTALL/opt/cannonball/docs/"
+      cp -R "$CRAFT_PART_SRC/res/." "$CRAFT_PART_INSTALL/opt/cannonball/res/"
+      cp -R "$CRAFT_PART_SRC/roms/." "$CRAFT_PART_INSTALL/opt/cannonball/docs/"
 
   cannonball-wrapper:
     after:
