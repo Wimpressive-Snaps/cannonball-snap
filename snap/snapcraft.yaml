@@ -111,9 +111,14 @@ parts:
       - libsdl2-2.0-0
       - libglu1-mesa
       - libgl1-mesa-dri
+      - libgl1
+      - libglx-mesa0
+      - libegl1
+      - libegl-mesa0
     override-pull: |
       craftctl default
       patch -p1 < "$CRAFT_PROJECT_DIR/snap/local/menu-cstdint.patch"
+      patch -p1 < "$CRAFT_PROJECT_DIR/snap/local/sdl-renderer-errors.patch"
     override-build: |
       cmake -S "$CRAFT_PART_SRC/cmake" -B "$CRAFT_PART_BUILD" -DTARGET=linux.cmake -DCMAKE_BUILD_TYPE=Release
       cmake --build "$CRAFT_PART_BUILD" --parallel "$CRAFT_PARALLEL_BUILD_COUNT"
@@ -149,6 +154,8 @@ apps:
       - snap/command-chain/alsa-launch
       - bin/cannonball-wrapper
     environment:
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/dri
+      __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
       ALWAYS_USE_PULSEAUDIO: 1
       LC_ALL: C
     plugs:
